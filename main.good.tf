@@ -208,10 +208,12 @@ resource "aws_autoscaling_group" "autoscaling_group_us_east_2" {
   desired_capacity     = 2
   max_size             = 4
   min_size             = 2
-  launch_template   {
+
+  launch_template {
     id      = aws_launch_template.launch_template_us_east_2.id
     version = "$Latest"
   }
+
   vpc_zone_identifier = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
 }
 
@@ -285,11 +287,7 @@ resource "aws_lb_listener_rule" "listener_rule_us_east_1" {
 
   condition {
     # field  = "path-pattern"
-
-    path_pattern {
-       values = ["/"]
-    }
-   
+    # values = ["/"]
   }
 }
 
