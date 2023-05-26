@@ -10,7 +10,7 @@ provider "aws" {
 # Define your IP address
 variable "keypair" {
   description = "ssh-key"
-  default     = "sreuniversity"  # Replace with your actual keypair name
+  default     = "sreuniversity"  # Replace with your actual IP address
 }
 
 # Define your IP address
@@ -25,7 +25,7 @@ resource "aws_vpc" "vpc_us_east_1" {
 }
 
 resource "aws_vpc" "vpc_us_east_2" {
-  cidr_block = "10.1.0.0/16"
+  cidr_block = "10.2.0.0/16"  # Modified CIDR block
   provider   = aws.us-east-2
 }
 
@@ -44,14 +44,14 @@ resource "aws_subnet" "subnet_us_east_1b" {
 
 resource "aws_subnet" "subnet_us_east_2a" {
   vpc_id            = aws_vpc.vpc_us_east_2.id
-  cidr_block        = "10.1.1.0/24"
+  cidr_block        = "10.2.1.0/24"  # Modified CIDR block
   availability_zone = "us-east-2a"
   provider          = aws.us-east-2
 }
 
 resource "aws_subnet" "subnet_us_east_2b" {
   vpc_id            = aws_vpc.vpc_us_east_2.id
-  cidr_block        = "10.1.2.0/24"
+  cidr_block        = "10.2.2.0/24"  # Modified CIDR block
   availability_zone = "us-east-2b"
   provider          = aws.us-east-2
 }
@@ -105,14 +105,6 @@ resource "aws_instance" "instance_us_east_1" {
   key_name      = var.keypair
   subnet_id     = aws_subnet.subnet_us_east_1a.id
   vpc_security_group_ids = [aws_security_group.security_group_us_east_1.id]
-
-  user_data = <<-EOF
-    #!/bin/bash
-    wget https://github.com/si3mshady/failover-exercise/blob/main/flask_app.py
-
-    
-    python3 flask_app.py
-    EOF
 }
 
 resource "aws_instance" "instance_us_east_2" {
@@ -121,16 +113,6 @@ resource "aws_instance" "instance_us_east_2" {
   key_name      = var.keypair
   subnet_id     = aws_subnet.subnet_us_east_2a.id
   vpc_security_group_ids = [aws_security_group.security_group_us_east_2.id]
-
-  user_data = <<-EOF
-    #!/bin/bash
-    wget https://github.com/si3mshady/failover-exercise/blob/main/flask_app.py
-
-    
-    python3 flask_app.py
-    EOF
-
-
 }
 
 # Create load balancers in each region
