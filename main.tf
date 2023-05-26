@@ -377,3 +377,4 @@ resource "aws_cloudwatch_metric_alarm" "cloudwatch_alarm_us_east_2" {
     InstanceId = aws_autoscaling_group.autoscaling_group_us_east_2.id
   }
 }
+
