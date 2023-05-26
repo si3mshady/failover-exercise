@@ -108,11 +108,10 @@ resource "aws_instance" "instance_us_east_1" {
 
   user_data = <<-EOF
     #!/bin/bash
-    echo "Instance IP: \$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
-    echo "Instance ID: \$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
-    echo "Region: $(aws configure get region)"
-    cd /path/to/flask/app
-    python app.py
+    wget https://github.com/si3mshady/failover-exercise/blob/main/flask_app.py
+
+    
+    python3 flask_app.py
     EOF
 }
 
@@ -125,12 +124,13 @@ resource "aws_instance" "instance_us_east_2" {
 
   user_data = <<-EOF
     #!/bin/bash
-    echo "Instance IP: \$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
-    echo "Instance ID: \$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
-    echo "Region: $(aws configure get region)"
-    cd /path/to/flask/app
-    python app.py
+    wget https://github.com/si3mshady/failover-exercise/blob/main/flask_app.py
+
+    
+    python3 flask_app.py
     EOF
+
+
 }
 
 # Create load balancers in each region
