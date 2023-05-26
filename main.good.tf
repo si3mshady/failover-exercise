@@ -160,34 +160,34 @@ resource "aws_security_group" "security_group_us_east_2" {
 # Create launch templates for autoscaling group
 resource "aws_launch_template" "launch_template_us_east_1" {
   provider = aws
-
   name                   = "lt-us-east-1"
   image_id               = "ami-053b0d53c279acc90"
   instance_type          = "t2.micro"
   key_name               = var.keypair
-  user_data              = <<-EOT
+  user_data              = base64encode( <<-EOT
     #!/bin/bash
     yum update -y
     yum install -y python3 wget
-    wget -O /home/ec2-user/flask_app.py https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
-    python3 /home/ec2-user/flask_app.py
+    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
+    python3 flask_app.py
     EOT
+  )
 }
 
 resource "aws_launch_template" "launch_template_us_east_2" {
   provider = aws.us-east-2
-
   name                   = "lt-us-east-2"
   image_id               = "ami-024e6efaf93d85776"
   instance_type          = "t2.micro"
   key_name               = var.keypair
-  user_data              = <<-EOT
+  user_data              = base64encode(<<-EOT
     #!/bin/bash
     yum update -y
     yum install -y python3 wget
-    wget -O /home/ec2-user/flask_app.py https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
-    python3 /home/ec2-user/flask_app.py
+    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
+    python3 flask_app.py
     EOT
+  )
 }
 
 # Create autoscaling group using launch templates
