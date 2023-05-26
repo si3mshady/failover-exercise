@@ -1,4 +1,3 @@
-# Define the AWS provider and regions
 provider "aws" {
   region = "us-east-1"
 }
@@ -147,7 +146,7 @@ resource "aws_launch_template" "launch_template_us_east_2" {
   name_prefix   = "lt-us-east-2-"
   image_id      = "ami-024e6efaf93d85776"
   instance_type = "t2.micro"
-  key_name      = "your_key_pair_name"
+  key_name      = var.keypair
   user_data     = "some_user_data"
 
   network_interfaces {
@@ -193,22 +192,6 @@ resource "aws_lb" "load_balancer_us_east_1" {
   subnets         = [aws_subnet.subnet_us_east_1.id]
   internal        = false
   security_groups = [aws_security_group.load_balancer_sg_us_east_1.id]
-
-  # Enable DNS failover for routing
-  enable_cross_zone_load_balancing = true
-  enable_deletion_protection       = false
-
-  # Define health checks for the load balancer
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    interval            = 30
-    timeout             = 5
-    protocol            = "HTTP"
-    matcher             = "200-399"
-    path                = "/"
-    port                = 80
-  }
 }
 
 resource "aws_lb" "load_balancer_us_east_2" {
@@ -217,89 +200,32 @@ resource "aws_lb" "load_balancer_us_east_2" {
   subnets         = [aws_subnet.subnet_us_east_2.id]
   internal        = false
   security_groups = [aws_security_group.load_balancer_sg_us_east_2.id]
-
-  # Enable DNS failover for routing
-  enable_cross_zone_load_balancing = true
-  enable_deletion_protection       = false
-
-  # Define health checks for the load balancer
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    interval            = 30
-    timeout             = 5
-    protocol            = "HTTP"
-    matcher             = "200-399"
-    path                = "/"
-    port                = 80
-  }
 }
 
-# Configure health checks on the load balancers
+# Create target groups and listeners in each region
 resource "aws_lb_target_group" "target_group_us_east_1" {
-  name     = "target-group-us-east-1"
+  name     = "tg-us-east-1"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc_us_east_1.id
-
-  # Configure health checks for the target group
-  health_check {
-    protocol               = "HTTP"
-    port                   = 80
-    interval               = 30
-    timeout                = 5
-    healthy_threshold      = 2
-    unhealthy_threshold    = 2
-    matcher                = "200"
-    path                   = "/"
-    enabled                = true
-    unhealthy_http_codes   = "500,502,503,504"
-    healthy_http_codes     = "200,301,302"
-    health_check_path      = "/"
-    health_check_port      = 80
-    health_check_protocol  = "HTTP"
-    health_check_interval  = 30
-    health_check_timeout   = 5
-    health_check_threshold = 2
-    # success_codes          = "200"
-   
-    # target_type            = "instance"
-  }
 }
 
 resource "aws_lb_target_group" "target_group_us_east_2" {
   provider = aws.us-east-2
-  name     = "target-group-us-east-2"
+  name     = "tg-us-east-2"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc_us_east_2.id
-
-  # Configure health checks for the target group
-  health_check {
-    protocol               = "HTTP"
-    port                   = 80
-    interval               = 30
-    timeout                = 5
-    healthy_threshold      = 2
-    unhealthy_threshold    = 2
-    matcher                = "200"
-    path                   = "/"
-    enabled                = true
-    unhealthy_http_codes   = "500,502,503,504"
-  }
 }
 
-
-
-# Create listeners on the load balancers
 resource "aws_lb_listener" "listener_us_east_1" {
   load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
     target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
+    type             = "forward"
   }
 }
 
@@ -310,71 +236,7 @@ resource "aws_lb_listener" "listener_us_east_2" {
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
     target_group_arn = aws_lb_target_group.target_group_us_east_2.arn
+    type             = "forward"
   }
 }
-
-# Configure DNS routing
-resource "aws_route53_zone" "route53_zone" {
-  name = "example.com."
-}
-
-resource "aws_route53_record" "route53_record_us_east_1" {
-  zone_id = aws_route53_zone.route53_zone.zone_id
-  name    = "example.com"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.load_balancer_us_east_1.dns_name
-    zone_id                = aws_lb.load_balancer_us_east_1.zone_id
-    evaluate_target_health = true
-  }
-}
-
-resource "aws_route53_record" "route53_record_us_east_2" {
-  zone_id = aws_route53_zone.route53_zone.zone_id
-  name    = "example.com"
-  type    = "A"
-
-  alias {
-    name                   = aws_lb.load_balancer_us_east_2.dns_name
-    zone_id                = aws_lb.load_balancer_us_east_2.zone_id
-    evaluate_target_health = true
-  }
-}
-
-# Configure CloudWatch alarms
-resource "aws_cloudwatch_metric_alarm" "cloudwatch_alarm_us_east_1" {
-  alarm_name          = "high-cpu-usage-us-east-1"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "80"
-  alarm_description   = "This metric monitors CPU usage on the instances in US East 1."
-  alarm_actions       = ["arn:aws:sns:us-east-1:123456789012:my-sns-topic"]
-  dimensions = {
-    InstanceId = aws_autoscaling_group.autoscaling_group_us_east_1.id
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "cloudwatch_alarm_us_east_2" {
-  provider            = aws.us-east-2
-  alarm_name          = "high-cpu-usage-us-east-2"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = "300"
-  statistic           = "Average"
-  threshold           = "80"
-  alarm_description   = "This metric monitors CPU usage on the instances in US East 2."
-  alarm_actions       = ["arn:aws:sns:us-east-2:123456789012:my-sns-topic"]
-  dimensions = {
-    InstanceId = aws_autoscaling_group.autoscaling_group_us_east_2.id
-  }
-}
-
