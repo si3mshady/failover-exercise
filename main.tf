@@ -100,16 +100,16 @@ resource "aws_security_group" "security_group_us_east_2" {
 
 # Create instances in each region
 resource "aws_instance" "instance_us_east_1" {
-  ami           = "ami-12345678"  # Replace with the actual AMI ID
-  instance_type = "t2.micro"
+  ami           = "ami-053b0d53c279acc90"  # Replace with the actual AMI ID
+  instance_type = "t2.medium"
   key_name      = var.keypair
   subnet_id     = aws_subnet.subnet_us_east_1a.id
   vpc_security_group_ids = [aws_security_group.security_group_us_east_1.id]
 }
 
 resource "aws_instance" "instance_us_east_2" {
-  ami           = "ami-87654321"  # Replace with the actual AMI ID
-  instance_type = "t2.micro"
+  ami           = "ami-024e6efaf93d85776"  # Replace with the actual AMI ID
+  instance_type = "t2.medium"
   key_name      = var.keypair
   subnet_id     = aws_subnet.subnet_us_east_2a.id
   vpc_security_group_ids = [aws_security_group.security_group_us_east_2.id]
