@@ -132,9 +132,26 @@ resource "aws_launch_template" "launch_template_us_east_1" {
   image_id      = "ami-053b0d53c279acc90"
   instance_type = "t2.micro"
   key_name      = var.keypair
-  user_data     = "some_user_data"
+  user_data     = <<-EOF
+                  #!/bin/bash
+                  echo "from flask import Flask, jsonify, request" >> /tmp/app.py
+                  echo "import datetime" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "app = Flask(__name__)" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "@app.route('/instance')" >> /tmp/app.py
+                  echo "def get_instance_info():" >> /tmp/app.py
+                  echo "    return jsonify({'region': 'us-east-1', 'time': datetime.datetime.now().isoformat()})" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "@app.route('/health')" >> /tmp/app.py
+                  echo "def health():" >> /tmp/app.py
+                  echo "    return '', 200" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "if __name__ == '__main__':" >> /tmp/app.py
+                  echo "    app.run(host='0.0.0.0')" >> /tmp/app.py
+                  EOF
 
-  network_interfaces {
+network_interfaces {
     security_groups = [aws_security_group.security_group_us_east_1.id]
     associate_public_ip_address = true
     subnet_id       = aws_subnet.subnet_us_east_1.id
@@ -146,8 +163,25 @@ resource "aws_launch_template" "launch_template_us_east_2" {
   name_prefix   = "lt-us-east-2-"
   image_id      = "ami-024e6efaf93d85776"
   instance_type = "t2.micro"
-  key_name      = var.keypair
-  user_data     = "some_user_data"
+  key_name      = "your_key_pair_name"
+  user_data     = <<-EOF
+                  #!/bin/bash
+                  echo "from flask import Flask, jsonify, request" >> /tmp/app.py
+                  echo "import datetime" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "app = Flask(__name__)" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "@app.route('/instance')" >> /tmp/app.py
+                  echo "def get_instance_info():" >> /tmp/app.py
+                  echo "    return jsonify({'region': 'us-east-2', 'time': datetime.datetime.now().isoformat()})" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "@app.route('/health')" >> /tmp/app.py
+                  echo "def health():" >> /tmp/app.py
+                  echo "    return '', 200" >> /tmp/app.py
+                  echo "" >> /tmp/app.py
+                  echo "if __name__ == '__main__':" >> /tmp/app.py
+                  echo "    app.run(host='0.0.0.0')" >> /tmp/app.py
+                  EOF
 
   network_interfaces {
     security_groups = [aws_security_group.security_group_us_east_2.id]
@@ -192,6 +226,10 @@ resource "aws_lb" "load_balancer_us_east_1" {
   subnets         = [aws_subnet.subnet_us_east_1.id]
   internal        = false
   security_groups = [aws_security_group.load_balancer_sg_us_east_1.id]
+
+  # Enable DNS failover for routing
+  enable_cross_zone_load_balancing = true
+  enable_deletion_protection       = false
 }
 
 resource "aws_lb" "load_balancer_us_east_2" {
@@ -200,24 +238,51 @@ resource "aws_lb" "load_balancer_us_east_2" {
   subnets         = [aws_subnet.subnet_us_east_2.id]
   internal        = false
   security_groups = [aws_security_group.load_balancer_sg_us_east_2.id]
+
+  # Enable DNS failover for routing
+  enable_cross_zone_load_balancing = true
+  enable_deletion_protection       = false
 }
 
-# Create target groups and listeners in each region
+# Create target groups for the load balancers
 resource "aws_lb_target_group" "target_group_us_east_1" {
-  name     = "tg-us-east-1"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.vpc_us_east_1.id
+  name        = "target-group-us-east-1"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc_us_east_1.id
+  target_type = "instance"
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    path                = "/health"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+  }
 }
 
 resource "aws_lb_target_group" "target_group_us_east_2" {
-  provider = aws.us-east-2
-  name     = "tg-us-east-2"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.vpc_us_east_2.id
+  provider    = aws.us-east-2
+  name        = "target-group-us-east-2"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc_us_east_2.id
+  target_type = "instance"
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    path                = "/health"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+  }
 }
 
+# Create listeners for the load balancers
 resource "aws_lb_listener" "listener_us_east_1" {
   load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
   port              = 80
