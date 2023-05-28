@@ -169,7 +169,7 @@ resource "aws_launch_template" "launch_template_us_east_1" {
   image_id               = "ami-053b0d53c279acc90"
   instance_type          = "t2.micro"
   key_name               = var.keypair
-  security_group_names   = [aws_security_group.security_group_us_east_1.name]  # Add security group name here
+  # security_group_names   = [aws_security_group.security_group_us_east_1.name]  # Add security group name here
 
   user_data              = base64encode(<<-EOT
     #!/bin/bash
@@ -193,7 +193,7 @@ resource "aws_launch_template" "launch_template_us_east_2" {
   image_id               = "ami-024e6efaf93d85776"
   instance_type          = "t2.micro"
   key_name               = var.keypair
-  security_group_names   = [aws_security_group.security_group_us_east_2.name]
+  # security_group_names   = [aws_security_group.security_group_us_east_2.name]
 
   user_data              = base64encode(<<-EOT
     #!/bin/bash
