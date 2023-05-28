@@ -3,12 +3,22 @@ fix sg groups for launch templates
 sudo apt update -y && \
 sudo apt install -y python3 && \
 sudo apt install -y python3-pip  && \
-sudo apt install -y  python3-venv && \
 sudo su - && \
 python3 -m venv venv && \
-sleep 4 && \
 source venv/bin/activate && \
 wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
 pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
-sleep 10
 sudo python3 flask_app.py
+
+
+sudo apt update -y && \
+sudo apt install -y python3 && \
+sudo apt install -y python3-pip  && \
+sudo apt install -y  python3-venv && \
+sudo su - && \
+python3 -m venv venv && \
+source venv/bin/activate && \
+wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
+pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
+sudo python3 flask_app.py
+

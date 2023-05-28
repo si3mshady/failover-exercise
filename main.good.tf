@@ -221,18 +221,26 @@ resource "aws_launch_template" "launch_template_us_east_1" {
   image_id               = "ami-053b0d53c279acc90"
   instance_type          = "t2.micro"
   key_name               = var.keypair
-  # security_group_names   = [aws_security_group.security_group_us_east_1.name]  # Add security group name here
+  # depends_on             = [aws_security_group.security_group_us_east_1]
+  # vpc_security_group_ids = [aws_security_group.security_group_us_east_1.id]  # Add security group name here
 
   user_data              = base64encode(<<-EOT
     #!/bin/bash
-    yum update -y && \
-    yum install -y python3 && \
+    sudo apt update -y && \
+    sudo apt install -y python3 && \
+    sudo apt install -y python3-pip  && \
+    sudo apt install -y  python3-venv && \
+    sudo su - && \
+    python3 -m venv venv && \
+    source venv/bin/activate && \
     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-    python3 flask_app.py
+    pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
+    sudo python3 flask_app.py
     EOT
   )
     network_interfaces {
     associate_public_ip_address = true
+    security_groups = [aws_security_group.security_group_us_east_1.id]
   }
 
 }
@@ -245,24 +253,56 @@ resource "aws_launch_template" "launch_template_us_east_2" {
   image_id               = "ami-024e6efaf93d85776"
   instance_type          = "t2.micro"
   key_name               = var.keypair
-  # security_group_names   = [aws_security_group.security_group_us_east_2.name]
+  
+  # vpc_security_group_ids   = [aws_security_group.security_group_us_east_2.id]
 
   user_data              = base64encode(<<-EOT
     #!/bin/bash
-    apt update -y && \
-
-    apt install -y python3 && \
-    apt  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-    apt https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
-    
-
-    python3 flask_app.py
+    sudo apt update -y && \
+    sudo apt install -y python3 && \
+    sudo apt install -y python3-pip  && \
+    sudo apt install -y  python3-venv && \
+    sudo su - && \
+    python3 -m venv venv && \
+    source venv/bin/activate && \
+    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
+    pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
+    sudo python3 flask_app.py
     EOT
   )
     network_interfaces {
     associate_public_ip_address = true
+    security_groups = [aws_security_group.security_group_us_east_2.id]
   }
 
+}
+
+resource "aws_lb_target_group" "target_group_us_east_2" {
+  provider = aws.us-east-2
+
+  name        = "tg-us-east-2"
+  port        = 8080
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.vpc_us_east_2.id
+  target_type = "instance"
+
+  health_check {
+    path = "/health"
+  }
+}
+
+# Create listeners for load balancers
+resource "aws_lb_listener" "listener_us_east_1" {
+  provider = aws
+
+  load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
+    type             = "forward"
+  }
 }
 
 # Create autoscaling group using launch templates
@@ -305,33 +345,7 @@ resource "aws_lb_target_group" "target_group_us_east_1" {
   }
 }
 
-resource "aws_lb_target_group" "target_group_us_east_2" {
-  provider = aws.us-east-2
 
-  name        = "tg-us-east-2"
-  port        = 8080
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.vpc_us_east_2.id
-  target_type = "instance"
-
-  health_check {
-    path = "/health"
-  }
-}
-
-# Create listeners for load balancers
-resource "aws_lb_listener" "listener_us_east_1" {
-  provider = aws
-
-  load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
-    type             = "forward"
-  }
-}
 
 resource "aws_lb_listener" "listener_us_east_2" {
   provider = aws.us-east-2
