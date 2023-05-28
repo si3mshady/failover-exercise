@@ -176,6 +176,10 @@ resource "aws_launch_template" "launch_template_us_east_1" {
     python3 flask_app.py
     EOT
   )
+    network_interfaces {
+    associate_public_ip_address = true
+  }
+
 }
 
 
@@ -194,6 +198,10 @@ resource "aws_launch_template" "launch_template_us_east_2" {
     python3 flask_app.py
     EOT
   )
+    network_interfaces {
+    associate_public_ip_address = true
+  }
+
 }
 
 # Create autoscaling group using launch templates
