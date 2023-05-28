@@ -249,9 +249,13 @@ resource "aws_launch_template" "launch_template_us_east_2" {
 
   user_data              = base64encode(<<-EOT
     #!/bin/bash
-    yum update -y && \
-    yum install -y python3 && \
-    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
+    apt update -y && \
+
+    apt install -y python3 && \
+    apt  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
+    apt https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
+    
+
     python3 flask_app.py
     EOT
   )
