@@ -1,0 +1,7 @@
+fix sg groups for launch templates
+
+sudo apt update -y && \
+sudo apt install -y python3 && \
+sudo wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
+
+sudo python3 flask_app.py

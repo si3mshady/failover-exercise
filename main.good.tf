@@ -80,6 +80,58 @@ resource "aws_subnet" "subnet_us_east_2b" {
   availability_zone = "us-east-2b"
 }
 
+
+resource "aws_route_table" "route_table_us_east_1" {
+  provider = aws
+  vpc_id = aws_vpc.vpc_us_east_1.id
+}
+
+resource "aws_route_table" "route_table_us_east_2" {
+  provider = aws.us-east-2
+  vpc_id = aws_vpc.vpc_us_east_2.id
+}
+
+
+resource "aws_route" "route_to_igw_us_east_1" {
+  provider = aws
+  route_table_id         = aws_route_table.route_table_us_east_1.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw_us_east_1.id
+}
+
+resource "aws_route" "route_to_igw_us_east_2" {
+  provider = aws.us-east-2
+  route_table_id         = aws_route_table.route_table_us_east_2.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw_us_east_2.id
+}
+
+
+resource "aws_route_table_association" "subnet_association_us_east_1a" {
+  provider = aws
+  subnet_id      = aws_subnet.subnet_us_east_1a.id
+  route_table_id = aws_route_table.route_table_us_east_1.id
+}
+
+resource "aws_route_table_association" "subnet_association_us_east_1b" {
+  provider = aws
+  subnet_id      = aws_subnet.subnet_us_east_1b.id
+  route_table_id = aws_route_table.route_table_us_east_1.id
+}
+
+resource "aws_route_table_association" "subnet_association_us_east_2a" {
+  provider = aws.us-east-2
+  subnet_id      = aws_subnet.subnet_us_east_2a.id
+  route_table_id = aws_route_table.route_table_us_east_2.id
+}
+
+resource "aws_route_table_association" "subnet_association_us_east_2b" {
+  provider = aws.us-east-2
+  subnet_id      = aws_subnet.subnet_us_east_2b.id
+  route_table_id = aws_route_table.route_table_us_east_2.id
+}
+
+
 # Create load balancers in each region
 resource "aws_lb" "load_balancer_us_east_1" {
   provider = aws
