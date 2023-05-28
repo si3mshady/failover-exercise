@@ -137,22 +137,25 @@ resource "aws_route_table_association" "subnet_association_us_east_2b" {
 resource "aws_lb" "load_balancer_us_east_1" {
   provider = aws
 
+  # port               = 80
+
   name               = "lb-us-east-1"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.security_group_us_east_1.id]
   subnets            = [aws_subnet.subnet_us_east_1a.id, aws_subnet.subnet_us_east_1b.id]
 
-  listener {
-    instance_port     = 8080
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
+  # listener {
+  #   instance_port     = 8080
+  #   instance_protocol = "http"
+  #   lb_port           = 80
+  #   lb_protocol       = "http"
+  # }
 }
 
 resource "aws_lb" "load_balancer_us_east_2" {
   provider = aws.us-east-2
+  # port               = 80
 
   name               = "lb-us-east-2"
   internal           = false
@@ -160,12 +163,13 @@ resource "aws_lb" "load_balancer_us_east_2" {
   security_groups    = [aws_security_group.security_group_us_east_2.id]
   subnets            = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
 
-  listener {
-    instance_port     = 8080
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
+   # listener {
+  #   instance_port     = 8080
+  #   instance_protocol = "http"
+  #   lb_port           = 80
+  #   lb_protocol       = "http"
+  # }
+  
 }
 
 # Create security groups for the instances and load balancers
@@ -173,6 +177,15 @@ resource "aws_security_group" "security_group_us_east_1" {
   provider = aws
 
   vpc_id = aws_vpc.vpc_us_east_1.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_address]
+  }
+
 
   # Define inbound rules
   ingress {
@@ -207,9 +220,19 @@ resource "aws_security_group" "security_group_us_east_2" {
   ingress {
     from_port   = 22
     to_port     = 22
+    
     protocol    = "tcp"
     cidr_blocks = [var.my_ip_address]
   }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip_address]
+  }
+
 
   ingress {
     from_port   = 8080
@@ -309,12 +332,6 @@ resource "aws_lb_listener" "listener_us_east_1" {
   port              = 80
   protocol          = "HTTP"
 
-  listener {
-    instance_port     = 8080
-    instance_protocol = "http"
-    lb_port           = 80
-    lb_protocol       = "http"
-  }
 
   default_action {
     target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
@@ -366,10 +383,12 @@ resource "aws_lb_target_group" "target_group_us_east_1" {
 
 resource "aws_lb_listener" "listener_us_east_2" {
   provider = aws.us-east-2
+  port = 80
 
   load_balancer_arn = aws_lb.load_balancer_us_east_2.arn
-  port              = 80
+ 
   protocol          = "HTTP"
+
 
   default_action {
     target_group_arn = aws_lb_target_group.target_group_us_east_2.arn

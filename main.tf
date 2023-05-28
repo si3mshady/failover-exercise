@@ -4,6 +4,7 @@
   
 # }
 
+
 # provider "aws" {
 #   alias  = "us-east-2"
 #   region = "us-east-2"
@@ -18,7 +19,8 @@
 # # Define your IP address
 # variable "my_ip_address" {
 #   description = "Your IP address"
-#   default     = "70.224.95.9/32"  # Replace with your actual IP address
+#   # default     = "70.224.95.9/32"  # Replace with your actual IP address
+#   default = "174.242.222.72/32"
 # }
 
 # # Create VPCs in each region
@@ -79,25 +81,95 @@
 #   availability_zone = "us-east-2b"
 # }
 
+
+# resource "aws_route_table" "route_table_us_east_1" {
+#   provider = aws
+#   vpc_id = aws_vpc.vpc_us_east_1.id
+# }
+
+# resource "aws_route_table" "route_table_us_east_2" {
+#   provider = aws.us-east-2
+#   vpc_id = aws_vpc.vpc_us_east_2.id
+# }
+
+
+# resource "aws_route" "route_to_igw_us_east_1" {
+#   provider = aws
+#   route_table_id         = aws_route_table.route_table_us_east_1.id
+#   destination_cidr_block = "0.0.0.0/0"
+#   gateway_id             = aws_internet_gateway.igw_us_east_1.id
+# }
+
+# resource "aws_route" "route_to_igw_us_east_2" {
+#   provider = aws.us-east-2
+#   route_table_id         = aws_route_table.route_table_us_east_2.id
+#   destination_cidr_block = "0.0.0.0/0"
+#   gateway_id             = aws_internet_gateway.igw_us_east_2.id
+# }
+
+
+# resource "aws_route_table_association" "subnet_association_us_east_1a" {
+#   provider = aws
+#   subnet_id      = aws_subnet.subnet_us_east_1a.id
+#   route_table_id = aws_route_table.route_table_us_east_1.id
+# }
+
+# resource "aws_route_table_association" "subnet_association_us_east_1b" {
+#   provider = aws
+#   subnet_id      = aws_subnet.subnet_us_east_1b.id
+#   route_table_id = aws_route_table.route_table_us_east_1.id
+# }
+
+# resource "aws_route_table_association" "subnet_association_us_east_2a" {
+#   provider = aws.us-east-2
+#   subnet_id      = aws_subnet.subnet_us_east_2a.id
+#   route_table_id = aws_route_table.route_table_us_east_2.id
+# }
+
+# resource "aws_route_table_association" "subnet_association_us_east_2b" {
+#   provider = aws.us-east-2
+#   subnet_id      = aws_subnet.subnet_us_east_2b.id
+#   route_table_id = aws_route_table.route_table_us_east_2.id
+# }
+
+
 # # Create load balancers in each region
 # resource "aws_lb" "load_balancer_us_east_1" {
 #   provider = aws
+
+#   # port               = 80
 
 #   name               = "lb-us-east-1"
 #   internal           = false
 #   load_balancer_type = "application"
 #   security_groups    = [aws_security_group.security_group_us_east_1.id]
 #   subnets            = [aws_subnet.subnet_us_east_1a.id, aws_subnet.subnet_us_east_1b.id]
+
+#   # listener {
+#   #   instance_port     = 8080
+#   #   instance_protocol = "http"
+#   #   lb_port           = 80
+#   #   lb_protocol       = "http"
+#   # }
 # }
 
 # resource "aws_lb" "load_balancer_us_east_2" {
 #   provider = aws.us-east-2
+#   # port               = 80
 
 #   name               = "lb-us-east-2"
 #   internal           = false
 #   load_balancer_type = "application"
 #   security_groups    = [aws_security_group.security_group_us_east_2.id]
 #   subnets            = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
+
+#    # listener {
+#   #   instance_port     = 8080
+#   #   instance_protocol = "http"
+#   #   lb_port           = 80
+#   #   lb_protocol       = "http"
+#   # }
+  
 # }
 
 # # Create security groups for the instances and load balancers
@@ -168,16 +240,23 @@
 #   image_id               = "ami-053b0d53c279acc90"
 #   instance_type          = "t2.micro"
 #   key_name               = var.keypair
+#   # depends_on             = [aws_security_group.security_group_us_east_1]
+#   # vpc_security_group_ids = [aws_security_group.security_group_us_east_1.id]  # Add security group name here
+
 #   user_data              = base64encode(<<-EOT
-#     #!/bin/bash
-#     yum update -y && \
-#     yum install -y python3 && \
-#     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-#     python3 flask_app.py
-#     EOT
+#       #!/bin/bash
+#       wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
+#       sudo chmod +x ./setup.sh
+#       sudo bash ./setup.sh
+
+#       wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
+#       sudo chmod +x ./run_flask_app.sh
+#       sudo bash ./run_flask_app.sh
+#       EOT
 #   )
 #     network_interfaces {
 #     associate_public_ip_address = true
+#     security_groups = [aws_security_group.security_group_us_east_1.id]
 #   }
 
 # }
@@ -190,18 +269,55 @@
 #   image_id               = "ami-024e6efaf93d85776"
 #   instance_type          = "t2.micro"
 #   key_name               = var.keypair
+  
+#   # vpc_security_group_ids   = [aws_security_group.security_group_us_east_2.id]
+
 #   user_data              = base64encode(<<-EOT
 #     #!/bin/bash
-#     yum update -y && \
-#     yum install -y python3 && \
-#     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-#     python3 flask_app.py
+#     wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
+#     sudo chmod +x ./setup.sh
+#     sudo bash ./setup.sh
+
+
+#     wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
+#     sudo chmod +x ./run_flask_app.sh
+#     sudo bash ./run_flask_app.sh
 #     EOT
 #   )
 #     network_interfaces {
 #     associate_public_ip_address = true
+#     security_groups = [aws_security_group.security_group_us_east_2.id]
 #   }
 
+# }
+
+# resource "aws_lb_target_group" "target_group_us_east_2" {
+#   provider = aws.us-east-2
+
+#   name        = "tg-us-east-2"
+#   port        = 8080
+#   protocol    = "HTTP"
+#   vpc_id      = aws_vpc.vpc_us_east_2.id
+#   target_type = "instance"
+
+#   health_check {
+#     path = "/health"
+#   }
+# }
+
+# # Create listeners for load balancers
+# resource "aws_lb_listener" "listener_us_east_1" {
+#   provider = aws
+
+#   load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
+#   port              = 80
+#   protocol          = "HTTP"
+
+
+#   default_action {
+#     target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
+#     type             = "forward"
+#   }
 # }
 
 # # Create autoscaling group using launch templates
@@ -244,40 +360,16 @@
 #   }
 # }
 
-# resource "aws_lb_target_group" "target_group_us_east_2" {
-#   provider = aws.us-east-2
 
-#   name        = "tg-us-east-2"
-#   port        = 8080
-#   protocol    = "HTTP"
-#   vpc_id      = aws_vpc.vpc_us_east_2.id
-#   target_type = "instance"
-
-#   health_check {
-#     path = "/health"
-#   }
-# }
-
-# # Create listeners for load balancers
-# resource "aws_lb_listener" "listener_us_east_1" {
-#   provider = aws
-
-#   load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
-#   port              = 80
-#   protocol          = "HTTP"
-
-#   default_action {
-#     target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
-#     type             = "forward"
-#   }
-# }
 
 # resource "aws_lb_listener" "listener_us_east_2" {
 #   provider = aws.us-east-2
+#   port = 80
 
 #   load_balancer_arn = aws_lb.load_balancer_us_east_2.arn
-#   port              = 80
+ 
 #   protocol          = "HTTP"
+
 
 #   default_action {
 #     target_group_arn = aws_lb_target_group.target_group_us_east_2.arn
