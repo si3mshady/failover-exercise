@@ -227,17 +227,13 @@ resource "aws_launch_template" "launch_template_us_east_1" {
   user_data              = base64encode(<<-EOT
       #!/bin/bash
       wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
-      sudo chmod +x setup.sh
+      sudo chmod +x ./setup.sh
       sudo bash ./setup.sh
 
 
-
-      sudo su - && \
-      python3 -m venv venv && \
-      source venv/bin/activate && \
-      wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-      pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
-      sudo python3 flask_app.py
+      wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
+      sudo chmod +x ./run_flask_app.sh
+      sudo bash ./run_flask_app.sh
       EOT
   )
     network_interfaces {
@@ -260,16 +256,14 @@ resource "aws_launch_template" "launch_template_us_east_2" {
 
   user_data              = base64encode(<<-EOT
     #!/bin/bash
-    sudo apt update -y && \
-    sudo apt install -y python3 && \
-    sudo apt install -y python3-pip  && \
-    sudo apt install -y  python3-venv && \
-    sudo su - && \
-    python3 -m venv venv && \
-    source venv/bin/activate && \
-    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-    pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
-    sudo python3 flask_app.py
+    wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
+    sudo chmod +x ./setup.sh
+    sudo bash ./setup.sh
+
+
+    wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
+    sudo chmod +x ./run_flask_app.sh
+    sudo bash ./run_flask_app.sh
     EOT
   )
     network_interfaces {
