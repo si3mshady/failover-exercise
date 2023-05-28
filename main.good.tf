@@ -231,6 +231,8 @@ resource "aws_launch_template" "launch_template_us_east_1" {
     sudo apt install -y python3-pip  && \
     sudo apt install -y  python3-venv && \
     sudo su - && \
+
+    
     python3 -m venv venv && \
     source venv/bin/activate && \
     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
