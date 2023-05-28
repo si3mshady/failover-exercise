@@ -170,9 +170,9 @@ resource "aws_launch_template" "launch_template_us_east_1" {
   key_name               = var.keypair
   user_data              = base64encode(<<-EOT
     #!/bin/bash
-    yum update -y
-    yum install -y python3 wget
-    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
+    yum update -y && \
+    yum install -y python3 && \
+    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
     python3 flask_app.py
     EOT
   )
@@ -192,9 +192,9 @@ resource "aws_launch_template" "launch_template_us_east_2" {
   key_name               = var.keypair
   user_data              = base64encode(<<-EOT
     #!/bin/bash
-    yum update -y
-    yum install -y python3 wget
-    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
+    yum update -y && \
+    yum install -y python3 && \
+    wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
     python3 flask_app.py
     EOT
   )
