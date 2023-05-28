@@ -1,4 +1,5 @@
 # provider "aws" {
+ 
 #   region = "us-east-1"
   
 # }
@@ -160,20 +161,25 @@
 
 # # Create launch templates for autoscaling group
 # resource "aws_launch_template" "launch_template_us_east_1" {
-#   provider = aws.us-east-1
+#   provider = aws
+
 
 #   name                   = "lt-us-east-1"
-#   image_id               = "ami-024e6efaf93d85776"
+#   image_id               = "ami-053b0d53c279acc90"
 #   instance_type          = "t2.micro"
 #   key_name               = var.keypair
 #   user_data              = base64encode(<<-EOT
 #     #!/bin/bash
-#     yum update -y
-#     yum install -y python3 wget
-#     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
+#     yum update -y && \
+#     yum install -y python3 && \
+#     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
 #     python3 flask_app.py
 #     EOT
 #   )
+#     network_interfaces {
+#     associate_public_ip_address = true
+#   }
+
 # }
 
 
@@ -184,22 +190,26 @@
 #   image_id               = "ami-024e6efaf93d85776"
 #   instance_type          = "t2.micro"
 #   key_name               = var.keypair
-#   user_data              = (<<-EOT
+#   user_data              = base64encode(<<-EOT
 #     #!/bin/bash
-#     yum update -y
-#     yum install -y python3 wget
-#     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py
+#     yum update -y && \
+#     yum install -y python3 && \
+#     wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
 #     python3 flask_app.py
 #     EOT
 #   )
+#     network_interfaces {
+#     associate_public_ip_address = true
+#   }
+
 # }
 
 # # Create autoscaling group using launch templates
 # resource "aws_autoscaling_group" "autoscaling_group_us_east_1" {
 #   provider             = aws
-#   desired_capacity     = 2
+#   desired_capacity     = 1
 #   max_size             = 4
-#   min_size             = 2
+#   min_size             = 1
 #   launch_template       {
 #     id      = aws_launch_template.launch_template_us_east_1.id
 #     version = "$Latest"
@@ -209,9 +219,9 @@
 
 # resource "aws_autoscaling_group" "autoscaling_group_us_east_2" {
 #   provider             = aws.us-east-2
-#   desired_capacity     = 2
+#   desired_capacity     = 1
 #   max_size             = 4
-#   min_size             = 2
+#   min_size             = 1
 #   launch_template   {
 #     id      = aws_launch_template.launch_template_us_east_2.id
 #     version = "$Latest"
@@ -305,6 +315,7 @@
 
 #   action {
 #     type = "forward"
+#     target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
 
 #     fixed_response {
 #       content_type = "text/plain"
@@ -352,6 +363,7 @@
 
 #   action {
 #     type = "forward"
+#     target_group_arn = aws_lb_target_group.target_group_us_east_2.arn
 
 #     fixed_response {
 #       content_type = "text/plain"

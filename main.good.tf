@@ -18,7 +18,8 @@ variable "keypair" {
 # Define your IP address
 variable "my_ip_address" {
   description = "Your IP address"
-  default     = "70.224.95.9/32"  # Replace with your actual IP address
+  # default     = "70.224.95.9/32"  # Replace with your actual IP address
+  default = "174.242.222.72/32"
 }
 
 # Create VPCs in each region
@@ -168,6 +169,8 @@ resource "aws_launch_template" "launch_template_us_east_1" {
   image_id               = "ami-053b0d53c279acc90"
   instance_type          = "t2.micro"
   key_name               = var.keypair
+  security_group_names   = [aws_security_group.security_group_us_east_1.name]  # Add security group name here
+
   user_data              = base64encode(<<-EOT
     #!/bin/bash
     yum update -y && \
@@ -190,6 +193,8 @@ resource "aws_launch_template" "launch_template_us_east_2" {
   image_id               = "ami-024e6efaf93d85776"
   instance_type          = "t2.micro"
   key_name               = var.keypair
+  security_group_names   = [aws_security_group.security_group_us_east_2.name]
+
   user_data              = base64encode(<<-EOT
     #!/bin/bash
     yum update -y && \
@@ -207,9 +212,9 @@ resource "aws_launch_template" "launch_template_us_east_2" {
 # Create autoscaling group using launch templates
 resource "aws_autoscaling_group" "autoscaling_group_us_east_1" {
   provider             = aws
-  desired_capacity     = 2
+  desired_capacity     = 1
   max_size             = 4
-  min_size             = 2
+  min_size             = 1
   launch_template       {
     id      = aws_launch_template.launch_template_us_east_1.id
     version = "$Latest"
@@ -219,9 +224,9 @@ resource "aws_autoscaling_group" "autoscaling_group_us_east_1" {
 
 resource "aws_autoscaling_group" "autoscaling_group_us_east_2" {
   provider             = aws.us-east-2
-  desired_capacity     = 2
+  desired_capacity     = 1
   max_size             = 4
-  min_size             = 2
+  min_size             = 1
   launch_template   {
     id      = aws_launch_template.launch_template_us_east_2.id
     version = "$Latest"
