@@ -142,6 +142,13 @@ resource "aws_lb" "load_balancer_us_east_1" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.security_group_us_east_1.id]
   subnets            = [aws_subnet.subnet_us_east_1a.id, aws_subnet.subnet_us_east_1b.id]
+
+  listener {
+    instance_port     = 8080
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
+  }
 }
 
 resource "aws_lb" "load_balancer_us_east_2" {
@@ -152,6 +159,13 @@ resource "aws_lb" "load_balancer_us_east_2" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.security_group_us_east_2.id]
   subnets            = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
+
+  listener {
+    instance_port     = 8080
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
+  }
 }
 
 # Create security groups for the instances and load balancers
@@ -294,6 +308,13 @@ resource "aws_lb_listener" "listener_us_east_1" {
   load_balancer_arn = aws_lb.load_balancer_us_east_1.arn
   port              = 80
   protocol          = "HTTP"
+
+  listener {
+    instance_port     = 8080
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
+  }
 
   default_action {
     target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
