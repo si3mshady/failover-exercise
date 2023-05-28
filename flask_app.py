@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 
 @app.route("/")
-def get_instance_info():
+def get_instance_data():
     instance_ip = requests.get('http://169.254.169.254/latest/meta-data/public-ipv4').text
     instance_id = requests.get('http://169.254.169.254/latest/meta-data/instance-id').text
     region = requests.get('http://169.254.169.254/latest/meta-data/placement/availability-zone').text[:-1]
@@ -31,7 +31,7 @@ def get_instance_info():
 
 
 @app.route("/health")
-def get_instance_info():
+def get_instance_health():
     return jsonify({"status": "ok"}), 200
 
 
