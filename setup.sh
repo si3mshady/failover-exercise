@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 #setup python virtual env
 sudo apt update -y && \
