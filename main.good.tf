@@ -231,7 +231,6 @@ resource "aws_launch_template" "launch_template_us_east_1" {
       sudo chmod +x ./setup.sh
       sudo bash ./setup.sh
 
-
       wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
       sudo chmod +x ./run_flask_app.sh
       sudo bash ./run_flask_app.sh
