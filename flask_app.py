@@ -26,15 +26,7 @@ def get_instance_health():
 
 @app.route("/")
 def get_instance_data():
-    instance_ip = requests.get('http://169.254.169.254/latest/meta-data/public-ipv4').text
-    instance_id = requests.get('http://169.254.169.254/latest/meta-data/instance-id').text
-    region = requests.get('http://169.254.169.254/latest/meta-data/placement/availability-zone').text[:-1]
-    
-    return jsonify({
-        'Instance IP': instance_ip,
-        'Instance ID': instance_id,
-        'Region': region
-    })
+       return jsonify({"status": "ok"}), 200
 
 
 if __name__ == "__main__":
