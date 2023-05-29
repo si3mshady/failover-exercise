@@ -136,9 +136,7 @@ resource "aws_route_table_association" "subnet_association_us_east_2b" {
 # Create load balancers in each region
 resource "aws_lb" "load_balancer_us_east_1" {
   provider = aws
-  
 
-  # port               = 80
 
   name               = "lb-us-east-1"
   internal           = false
@@ -146,17 +144,12 @@ resource "aws_lb" "load_balancer_us_east_1" {
   security_groups    = [aws_security_group.security_group_us_east_1.id]
   subnets            = [aws_subnet.subnet_us_east_1a.id, aws_subnet.subnet_us_east_1b.id]
 
-  # listener {
-  #   instance_port     = 8080
-  #   instance_protocol = "http"
-  #   lb_port           = 80
-  #   lb_protocol       = "http"
-  # }
+  
 }
 
 resource "aws_lb" "load_balancer_us_east_2" {
   provider = aws.us-east-2
-  # port               = 80
+ 
 
   name               = "lb-us-east-2"
   internal           = false
@@ -164,12 +157,7 @@ resource "aws_lb" "load_balancer_us_east_2" {
   security_groups    = [aws_security_group.security_group_us_east_2.id]
   subnets            = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
 
-   # listener {
-  #   instance_port     = 8080
-  #   instance_protocol = "http"
-  #   lb_port           = 80
-  #   lb_protocol       = "http"
-  # }
+ 
   
 }
 
@@ -253,65 +241,65 @@ resource "aws_security_group" "security_group_us_east_2" {
 
 
 
-# Create launch templates for autoscaling group
-resource "aws_launch_template" "launch_template_us_east_1" {
-  provider = aws
+# # Create launch templates for autoscaling group
+# resource "aws_launch_template" "launch_template_us_east_1" {
+#   provider = aws
 
 
-  name                   = "lt-us-east-1"
-  image_id               = "ami-053b0d53c279acc90"
-  instance_type          = "t2.micro"
-  key_name               = var.keypair
-  # depends_on             = [aws_security_group.security_group_us_east_1]
-  # vpc_security_group_ids = [aws_security_group.security_group_us_east_1.id]  # Add security group name here
+#   name                   = "lt-us-east-1"
+#   image_id               = "ami-053b0d53c279acc90"
+#   instance_type          = "t2.micro"
+#   key_name               = var.keypair
+#   # depends_on             = [aws_security_group.security_group_us_east_1]
+#   # vpc_security_group_ids = [aws_security_group.security_group_us_east_1.id]  # Add security group name here
 
-  user_data              = base64encode(<<-EOT
-      #!/bin/bash
-      wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
-      sudo chmod +x ./setup.sh
-      sudo bash ./setup.sh
+#   user_data              = base64encode(<<-EOT
+#       #!/bin/bash
+#       wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
+#       sudo chmod +x ./setup.sh
+#       sudo bash ./setup.sh
 
-      wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
-      sudo chmod +x ./run_flask_app.sh
-      sudo bash ./run_flask_app.sh
-      EOT
-  )
-    network_interfaces {
-    associate_public_ip_address = true
-    security_groups = [aws_security_group.security_group_us_east_1.id]
-  }
+#       wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
+#       sudo chmod +x ./run_flask_app.sh
+#       sudo bash ./run_flask_app.sh
+#       EOT
+#   )
+#     network_interfaces {
+#     associate_public_ip_address = true
+#     security_groups = [aws_security_group.security_group_us_east_1.id]
+#   }
 
-}
+# }
 
 
-resource "aws_launch_template" "launch_template_us_east_2" {
-  provider = aws.us-east-2
+# resource "aws_launch_template" "launch_template_us_east_2" {
+#   provider = aws.us-east-2
 
-  name                   = "lt-us-east-2"
-  image_id               = "ami-024e6efaf93d85776"
-  instance_type          = "t2.micro"
-  key_name               = var.keypair
+#   name                   = "lt-us-east-2"
+#   image_id               = "ami-024e6efaf93d85776"
+#   instance_type          = "t2.micro"
+#   key_name               = var.keypair
   
-  # vpc_security_group_ids   = [aws_security_group.security_group_us_east_2.id]
+#   # vpc_security_group_ids   = [aws_security_group.security_group_us_east_2.id]
 
-  user_data              = base64encode(<<-EOT
-    #!/bin/bash
-    wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
-    sudo chmod +x ./setup.sh
-    sudo bash ./setup.sh
+#   user_data              = base64encode(<<-EOT
+#     #!/bin/bash
+#     wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
+#     sudo chmod +x ./setup.sh
+#     sudo bash ./setup.sh
 
 
-    wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
-    sudo chmod +x ./run_flask_app.sh
-    sudo bash ./run_flask_app.sh
-    EOT
-  )
-    network_interfaces {
-    associate_public_ip_address = true
-    security_groups = [aws_security_group.security_group_us_east_2.id]
-  }
+#     wget https://raw.githubusercontent.com/si3mshady/failover-exercise/main/run_flask_app.sh
+#     sudo chmod +x ./run_flask_app.sh
+#     sudo bash ./run_flask_app.sh
+#     EOT
+#   )
+#     network_interfaces {
+#     associate_public_ip_address = true
+#     security_groups = [aws_security_group.security_group_us_east_2.id]
+#   }
 
-}
+# }
 
 resource "aws_lb_target_group" "target_group_us_east_2" {
   provider = aws.us-east-2
@@ -320,7 +308,7 @@ resource "aws_lb_target_group" "target_group_us_east_2" {
   port        = 8080
   protocol    = "HTTP"
   vpc_id      = aws_vpc.vpc_us_east_2.id
-  target_type = "instance"
+  # target_type = "instance"
   
   # for_each = aws_launch_template.launch_template_us_east_2.instances
   
@@ -328,6 +316,12 @@ resource "aws_lb_target_group" "target_group_us_east_2" {
 
   health_check {
     path = "/health"
+    port        = 8080
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+    # matcher = "200"
   }
 }
 
@@ -346,30 +340,30 @@ resource "aws_lb_listener" "listener_us_east_1" {
   }
 }
 
-# Create autoscaling group using launch templates
-resource "aws_autoscaling_group" "autoscaling_group_us_east_1" {
-  provider             = aws
-  desired_capacity     = 1
-  max_size             = 4
-  min_size             = 1
-  launch_template       {
-    id      = aws_launch_template.launch_template_us_east_1.id
-    version = "$Latest"
-  }
-  vpc_zone_identifier = [aws_subnet.subnet_us_east_1a.id, aws_subnet.subnet_us_east_1b.id]
-}
+# # Create autoscaling group using launch templates
+# resource "aws_autoscaling_group" "autoscaling_group_us_east_1" {
+#   provider             = aws
+#   desired_capacity     = 1
+#   max_size             = 4
+#   min_size             = 1
+#   launch_template       {
+#     id      = aws_launch_template.launch_template_us_east_1.id
+#     version = "$Latest"
+#   }
+#   vpc_zone_identifier = [aws_subnet.subnet_us_east_1a.id, aws_subnet.subnet_us_east_1b.id]
+# }
 
-resource "aws_autoscaling_group" "autoscaling_group_us_east_2" {
-  provider             = aws.us-east-2
-  desired_capacity     = 1
-  max_size             = 4
-  min_size             = 1
-  launch_template   {
-    id      = aws_launch_template.launch_template_us_east_2.id
-    version = "$Latest"
-  }
-  vpc_zone_identifier = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
-}
+# resource "aws_autoscaling_group" "autoscaling_group_us_east_2" {
+#   provider             = aws.us-east-2
+#   desired_capacity     = 1
+#   max_size             = 4
+#   min_size             = 1
+#   launch_template   {
+#     id      = aws_launch_template.launch_template_us_east_2.id
+#     version = "$Latest"
+#   }
+#   vpc_zone_identifier = [aws_subnet.subnet_us_east_2a.id, aws_subnet.subnet_us_east_2b.id]
+# }
 
 # Define target groups for load balancers
 resource "aws_lb_target_group" "target_group_us_east_1" {
@@ -379,12 +373,18 @@ resource "aws_lb_target_group" "target_group_us_east_1" {
   port        = 8080
   protocol    = "HTTP"
   vpc_id      = aws_vpc.vpc_us_east_1.id
-  target_type = "instance"
+  # target_type = "instance"
 
   # launch_template_arn =  aws_launch_template.launch_template_us_east_1.arn
 
   health_check {
     path = "/health"
+    port        = 8080
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+ 
   }
 }
 
@@ -394,7 +394,7 @@ resource "aws_lb_target_group_attachment" "attachment_us_east1" {
   target_group_arn = aws_lb_target_group.target_group_us_east_1.arn
   target_id = aws_instance.instance_us_east_1.id
   port = 8080
-  # target_id        = aws_launch_template.launch_template_us_east_1.id #launch Template
+  # target_id        = eaws_launch_template.launch_template_us_east_1.id #launch Template
   
 }
 
@@ -523,6 +523,30 @@ resource "aws_lb_listener_rule" "listener_rule_us_east_2_instance" {
   }
 }
 
+resource "aws_eip" "eip1" {
+  provider = aws
+  depends_on = [ aws_instance.instance_us_east_2 ]
+}
+
+resource "aws_eip" "eip2" {
+  provider = aws.us-east-2
+  depends_on = [ aws_instance.instance_us_east_2 ]
+
+}
+
+
+resource "aws_eip_association" "my_eip_association_us_east_1" {
+  provider = aws
+  instance_id   =  aws_instance.instance_us_east_1.id
+  allocation_id = aws_eip.eip1.id
+}
+
+
+resource "aws_eip_association" "my_eip_association_us_east_2" {
+  provider = aws.us-east-2
+  instance_id   = aws_instance.instance_us_east_2.id
+  allocation_id = aws_eip.eip2.id
+}
 
 resource "aws_instance" "instance_us_east_1" {
   provider = aws
@@ -534,10 +558,7 @@ resource "aws_instance" "instance_us_east_1" {
 
  
   security_groups = [aws_security_group.security_group_us_east_1.id]
-  # network_interface {
-  #   device_index = 0
-  #   # associate_public_ip_address = true
-  # }
+ 
   user_data = base64encode(<<-EOT
     #!/bin/bash
     wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
@@ -564,10 +585,7 @@ resource "aws_instance" "instance_us_east_2" {
   key_name = var.keypair
   depends_on = [ aws_security_group.security_group_us_east_2 ]
   security_groups = [aws_security_group.security_group_us_east_2.id]
-  # network_interface {
-  #   device_index = 0
-  #   # associate_public_ip_address = true
-  # }
+   
   user_data = base64encode(<<-EOT
     #!/bin/bash
     wget  https://raw.githubusercontent.com/si3mshady/failover-exercise/main/setup.sh
