@@ -1,25 +1,17 @@
-fix sg groups for launch templates
+The provided code is missing the following steps to implement a failover strategy with the load balancer:
 
-sudo apt update -y && \
-sudo apt install -y python3 && \
-sudo apt install -y python3-pip  && \
-sudo su - && \
-python3 -m venv venv && \
-source venv/bin/activate && \
-wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
-sudo python3 flask_app.py
+1. Create an Amazon Route 53 health check: A health check monitors the health of the instances behind the load balancer and automatically routes traffic to healthy instances. You can create a health check using the `aws_route53_health_check` resource.
 
+2. Create an Amazon Route 53 DNS record: Route 53 allows you to configure DNS records to route traffic to different endpoints based on health checks. You can create a DNS record using the `aws_route53_record` resource and configure it to use the health check created in the previous step.
 
-sudo apt update -y && \
-sudo apt install -y python3 && \
-sudo apt install -y python3-pip  && \
-sudo apt install -y  python3-venv && \
-sudo su - && \
-python3 -m venv venv && \
-source venv/bin/activate && \
-wget  https://github.com/si3mshady/failover-exercise/raw/main/flask_app.py && \
-pip3 install  -r https://raw.githubusercontent.com/si3mshady/failover-exercise/main/requirements.txt && \
-sudo python3 flask_app.py
+3. Configure the load balancer to use multiple target groups: In order to implement failover, you need to configure the load balancer to use multiple target groups. Each target group represents a set of instances in different regions. You can create additional target groups using the `aws_lb_target_group` resource and attach them to the load balancer.
 
-configure load balacer 
+4. Configure the load balancer listeners and rules: You need to update the load balancer listeners and rules to distribute traffic across the multiple target groups. Each listener rule should be configured to forward traffic to the appropriate target group based on the desired routing logic. You can modify the existing listener rules or create new ones using the `aws_lb_listener_rule` resource.
+
+5. Set up health checks for the target groups: Configure health checks for each target group to monitor the health of instances. This ensures that the load balancer can accurately route traffic to healthy instances. You can specify the health check settings within the `aws_lb_target_group` resource.
+
+6. Configure the failover behavior: Determine the failover behavior you want to implement, such as active-passive or active-active. This will depend on your specific requirements. For example, if you want to implement active-passive failover, you can configure Amazon Route 53 to monitor the health of the primary target group and automatically failover to the secondary target group if the primary becomes unhealthy.
+
+7. Implement automation for instance provisioning and termination: To ensure high availability and automatic scaling, you may need to implement automation for provisioning and terminating instances in response to changes in demand or instance health. This can be achieved using services such as AWS Auto Scaling or AWS Elastic Beanstalk.
+
+These additional steps will enable you to implement a failover strategy with the load balancer and achieve higher availability and fault tolerance in your infrastructure.
