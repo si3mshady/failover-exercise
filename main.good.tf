@@ -529,7 +529,7 @@ resource "aws_route53_record" "primary" {
   zone_id = var.hostedzone
   name    = var.domainname
   type    = "A"
-  ttl     = 300
+  # ttl     = 300
 
   
 
@@ -538,8 +538,14 @@ resource "aws_route53_record" "primary" {
   }
 
   set_identifier = "primary"
-  records        = [aws_eip.eip1.public_ip]
+  # records        = [aws_eip.eip1.public_ip]
   health_check_id = aws_route53_health_check.sreuniversity_check_primary.id
+
+  alias {
+    name                   =  aws_lb.load_balancer_us_east_1.name
+    zone_id                = var.hostedzone
+    evaluate_target_health = true
+  }
 
 }
 
@@ -548,7 +554,7 @@ resource "aws_route53_record" "secondary" {
   zone_id = var.hostedzone
   name    = var.domainname
   type    = "A"
-  ttl     = 300
+  # ttl     = 300
 
   
 
@@ -557,8 +563,16 @@ resource "aws_route53_record" "secondary" {
   }
 
   set_identifier = "secondary"
-  records        = [aws_eip.eip2.public_ip]
+  # records        = [aws_eip.eip2.public_ip]
   health_check_id = aws_route53_health_check.sreuniversity_check_secondary.id
+
+
+   alias {
+    name                   =  aws_lb.load_balancer_us_east_2.name
+    zone_id                = var.hostedzone
+    evaluate_target_health = true
+  }
+
 
 }
 
