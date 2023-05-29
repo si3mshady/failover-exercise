@@ -417,7 +417,8 @@ resource "aws_lb_listener" "listener_us_east_2" {
 
   load_balancer_arn = aws_lb.load_balancer_us_east_2.arn
  
-  protocol          = "HTTP"
+  # protocol          = "HTTP"
+  protocol = "HTTP"
 
 
   default_action {
