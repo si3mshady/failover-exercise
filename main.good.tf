@@ -593,7 +593,7 @@ resource "aws_route53_record" "secondary" {
 resource "aws_route53_health_check" "sreuniversity_check_primary" {
   provider = aws
   ip_address        = aws_eip.eip1.public_ip
-  port              = 80
+  port              = 8080
   type              = "HTTP"
   resource_path     = "/"
   failure_threshold = "2"
@@ -608,7 +608,7 @@ resource "aws_route53_health_check" "sreuniversity_check_primary" {
 resource "aws_route53_health_check" "sreuniversity_check_secondary" {
   provider = aws.us-east-2
   ip_address        = aws_eip.eip2.public_ip
-  port              = 80
+  port              = 8080
   type              = "HTTP"
   resource_path     = "/"
   failure_threshold = "2"
