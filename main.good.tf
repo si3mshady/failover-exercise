@@ -524,18 +524,14 @@ resource "aws_instance" "instance_us_east_2" {
 
 }
 
-data "aws_lb_hosted_zone_id" "route53_zone_id_alb_us_east1" {
-  # provider = aws
+
+data "aws_elb_hosted_zone_id" "primary" {
   region = "us-east-1"
-  # region = var.region
-  load_balancer_type = "application"
 }
 
 
-data "aws_lb_hosted_zone_id" "route53_zone_id_alb_us_east2" {
-  provider = aws.us-east-2
+data "aws_elb_hosted_zone_id" "secondary" {
   region = "us-east-2"
-  load_balancer_type = "application"
 }
 
 
@@ -558,8 +554,8 @@ resource "aws_route53_record" "primary" {
   health_check_id = aws_route53_health_check.sreuniversity_check_primary.id
 
   alias {
-    name                   =  aws_lb.load_balancer_us_east_1.name
-    zone_id                = "Z35SXDOTRQ7X7K" #https://docs.aws.amazon.com/general/latest/gr/elb.html
+    name                   =  aws_lb.load_balancer_us_east_1.dns_name
+    zone_id                =  aws_lb.load_balancer_us_east_1.zone_id #"Z35SXDOTRQ7X7K" #https://docs.aws.amazon.com/general/latest/gr/elb.html
     evaluate_target_health = true
   }
 
@@ -585,8 +581,8 @@ resource "aws_route53_record" "secondary" {
 
 
    alias {
-    name                   =  aws_lb.load_balancer_us_east_2.name
-    zone_id                =  "Z3AADJGX6KTTL2"
+    name                   =  aws_lb.load_balancer_us_east_2.dns_name
+    zone_id                =    aws_lb.load_balancer_us_east_2.zone_id #
     evaluate_target_health = true
   }
 
@@ -646,10 +642,10 @@ resource "aws_route53_health_check" "sreuniversity_check_secondary" {
 
 
 
-
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record#alias
 
 # aws elbv2 describe-load-balancers --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:335055665325:loadbalancer/app/lb-us-east-1/a0c2d29ae09838a6
-
+#https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record#alias
 
 
 output "elastic_ip1" {
