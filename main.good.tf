@@ -172,7 +172,7 @@ resource "aws_security_group" "security_group_us_east_1" {
     to_port     = 80
     
     protocol    = "tcp"
-    cidr_blocks = [var.my_ip_address]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
 
