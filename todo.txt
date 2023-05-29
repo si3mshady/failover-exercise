@@ -1,6 +1,6 @@
 The provided code is missing the following steps to implement a failover strategy with the load balancer:
 
-1. Create an Amazon Route 53 health check: A health check monitors the health of the instances behind the load balancer and automatically routes traffic to healthy instances. You can create a health check using the `aws_route53_health_check` resource.
+#1. Create an Amazon Route 53 health check: A health check monitors the health of the instances behind the load balancer and automatically routes traffic to healthy instances. You can create a health check using the `aws_route53_health_check` resource.
 
 2. Create an Amazon Route 53 DNS record: Route 53 allows you to configure DNS records to route traffic to different endpoints based on health checks. You can create a DNS record using the `aws_route53_record` resource and configure it to use the health check created in the previous step.
 

@@ -10,6 +10,18 @@ provider "aws" {
   region = "us-east-2"
 }
 
+#define hosted  zone
+variable "hostedzone" {
+  description = "hostedzone"
+  default     = "Z08654031QGJY8UEMAS55"  # Replace with your actual keypair name
+}
+
+#define domain name
+variable "domainname" {
+  description = "domainname"
+  default     = "sreuniversity.org"  # Replace with your actual keypair name
+}
+
 # Define your IP address
 variable "keypair" {
   description = "ssh-key"
@@ -457,6 +469,7 @@ resource "aws_eip_association" "my_eip_association_us_east_2" {
   allocation_id = aws_eip.eip2.id
 }
 
+
 resource "aws_instance" "instance_us_east_1" {
   provider = aws
   instance_type = "t2.micro"
@@ -509,4 +522,106 @@ resource "aws_instance" "instance_us_east_2" {
   )
 
 
+}
+
+
+resource "aws_route53_record" "primary" {
+  zone_id = var.hostedzone
+  name    = var.domainname
+  type    = "A"
+  ttl     = 300
+
+  
+
+   failover_routing_policy {
+    type = "PRIMARY"
+  }
+
+  set_identifier = "primary"
+  records        = [aws_eip.eip1.public_ip]
+  health_check_id = aws_route53_health_check.sreuniversity_check_primary.id
+
+}
+
+
+resource "aws_route53_record" "secondary" {
+  zone_id = var.hostedzone
+  name    = var.domainname
+  type    = "A"
+  ttl     = 300
+
+  
+
+   failover_routing_policy {
+    type = "SECONDARY"
+  }
+
+  set_identifier = "secondary"
+  records        = [aws_eip.eip2.public_ip]
+  health_check_id = aws_route53_health_check.sreuniversity_check_secondary.id
+
+}
+
+########HEALTH CHECKS############
+resource "aws_route53_health_check" "sreuniversity_check_primary" {
+  ip_address        = aws_eip.eip1.public_ip
+  port              = 80
+  type              = "HTTP"
+  resource_path     = "/"
+  failure_threshold = "2"
+  request_interval  = "30"
+
+  tags = {
+    Name = "route53-primary-health-check"
+  }
+}
+
+
+resource "aws_route53_health_check" "sreuniversity_check_secondary" {
+  ip_address        = aws_eip.eip2.public_ip
+  port              = 80
+  type              = "HTTP"
+  resource_path     = "/"
+  failure_threshold = "2"
+  request_interval  = "30"
+
+  tags = {
+    Name = "route53-secondary-health-check"
+  }
+}
+
+
+# resource "aws_route53_health_check" "example_us_east_2" {
+#   provider = aws.us-east-2
+
+#   fqdn                = aws_lb.load_balancer_us_east_2.dns_name
+#   port                = 80
+#   type                = "HTTP"
+#   resource_path       = "/health"
+#   request_interval    = 30
+#   failure_threshold   = 3
+#   enable_sni          = false
+#   measure_latency     = true
+#   invert_healthcheck  = false
+#   disabled            = false
+#   insufficient_data_health_status = "LastKnownStatus"
+# }
+
+
+
+
+
+
+
+
+
+
+
+
+output "elastic_ip1" {
+  value = aws_eip.eip1.public_ip
+}
+
+output "elastic_ip2" {
+  value = aws_eip.eip2.public_ip
 }
