@@ -524,8 +524,24 @@ resource "aws_instance" "instance_us_east_2" {
 
 }
 
+data "aws_lb_hosted_zone_id" "route53_zone_id_alb_us_east1" {
+  # provider = aws
+  region = "us-east-1"
+  # region = var.region
+  load_balancer_type = "application"
+}
+
+
+data "aws_lb_hosted_zone_id" "route53_zone_id_alb_us_east2" {
+  provider = aws.us-east-2
+  region = "us-east-2"
+  load_balancer_type = "application"
+}
+
+
 
 resource "aws_route53_record" "primary" {
+  provider = aws
   zone_id = var.hostedzone
   name    = var.domainname
   type    = "A"
@@ -543,7 +559,7 @@ resource "aws_route53_record" "primary" {
 
   alias {
     name                   =  aws_lb.load_balancer_us_east_1.name
-    zone_id                = var.hostedzone
+    zone_id                = "Z35SXDOTRQ7X7K" #https://docs.aws.amazon.com/general/latest/gr/elb.html
     evaluate_target_health = true
   }
 
@@ -551,6 +567,7 @@ resource "aws_route53_record" "primary" {
 
 
 resource "aws_route53_record" "secondary" {
+   provider = aws.us-east-2
   zone_id = var.hostedzone
   name    = var.domainname
   type    = "A"
@@ -569,7 +586,7 @@ resource "aws_route53_record" "secondary" {
 
    alias {
     name                   =  aws_lb.load_balancer_us_east_2.name
-    zone_id                = var.hostedzone
+    zone_id                =  "Z3AADJGX6KTTL2"
     evaluate_target_health = true
   }
 
@@ -578,6 +595,7 @@ resource "aws_route53_record" "secondary" {
 
 ########HEALTH CHECKS############
 resource "aws_route53_health_check" "sreuniversity_check_primary" {
+  provider = aws
   ip_address        = aws_eip.eip1.public_ip
   port              = 80
   type              = "HTTP"
@@ -592,6 +610,7 @@ resource "aws_route53_health_check" "sreuniversity_check_primary" {
 
 
 resource "aws_route53_health_check" "sreuniversity_check_secondary" {
+  provider = aws.us-east-2
   ip_address        = aws_eip.eip2.public_ip
   port              = 80
   type              = "HTTP"
@@ -603,6 +622,7 @@ resource "aws_route53_health_check" "sreuniversity_check_secondary" {
     Name = "route53-secondary-health-check"
   }
 }
+
 
 
 # resource "aws_route53_health_check" "example_us_east_2" {
@@ -622,13 +642,13 @@ resource "aws_route53_health_check" "sreuniversity_check_secondary" {
 # }
 
 
+# https://stackoverflow.com/questions/71649984/issue-to-get-all-hosted-zone-id-of-aws-elb-through-terraform
 
 
 
 
 
-
-
+# aws elbv2 describe-load-balancers --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:335055665325:loadbalancer/app/lb-us-east-1/a0c2d29ae09838a6
 
 
 
