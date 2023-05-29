@@ -93,6 +93,7 @@ resource "aws_route_table" "route_table_us_east_2" {
 }
 
 
+
 resource "aws_route" "route_to_igw_us_east_1" {
   provider = aws
   route_table_id         = aws_route_table.route_table_us_east_1.id
