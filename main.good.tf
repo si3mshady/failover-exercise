@@ -31,8 +31,8 @@ variable "keypair" {
 # Define your IP address
 variable "my_ip_address" {
   description = "Your IP address"
-  # default     = "70.224.95.9/32"  # Replace with your actual IP address
-  default = "174.242.222.72/32"
+  default     = "70.224.95.9/32"  # Replace with your actual IP address
+  # default = "174.242.222.72/32"
 }
 
 # Create VPCs in each region
@@ -576,7 +576,6 @@ resource "aws_route53_record" "secondary" {
   }
 
   set_identifier = "secondary"
-  # records        = [aws_eip.eip2.public_ip]
   health_check_id = aws_route53_health_check.sreuniversity_check_secondary.id
 
 
@@ -597,7 +596,7 @@ resource "aws_route53_health_check" "sreuniversity_check_primary" {
   type              = "HTTP"
   resource_path     = "/"
   failure_threshold = "2"
-  request_interval  = "30"
+  request_interval  = "10"
 
   tags = {
     Name = "route53-primary-health-check"
@@ -612,7 +611,7 @@ resource "aws_route53_health_check" "sreuniversity_check_secondary" {
   type              = "HTTP"
   resource_path     = "/"
   failure_threshold = "2"
-  request_interval  = "30"
+  request_interval  = "10"
 
   tags = {
     Name = "route53-secondary-health-check"
